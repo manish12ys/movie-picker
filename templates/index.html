@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Movie Picker</title>
+    <style>
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        h1 {
+            color: #9b5de5;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            animation: fadeInDown 0.5s ease;
+        }
+
+        .controls {
+    display: flex;
+    gap: 30px; /* Increased gap for better spacing */
+    margin-top: 10px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap; /* Ensures wrapping on smaller screens */
+    padding: 10px 0;
+}
+
+        select, button {
+            padding: 12px 24px; /* Increased padding */
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            outline: none;
+            transition: background 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            width: auto;
+            max-width: 240px;
+        }
+
+        select {
+            background-color: #222;
+            color: #fff;
+            text-align: center;
+        }
+
+        button {
+            background-color: #9b5de5;
+            color: #fff;
+            font-weight: 600;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #6a4c93;
+            transform: translateY(-3px);
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: 600;
+            color: #f4a261;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        img {
+            max-width: 250px;
+            margin-top: 20px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
+            display: none;
+        }
+
+        img:hover {
+            transform: scale(1.05);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎬 Pick a Movie Based on Your Mood</h1>
+    
+    <div class="controls">
+        <select id="mode">
+            <option value="" disabled selected>Select your mood</option>
+            <option value="happy">😊 Happy</option>
+            <option value="sad">😢 Sad</option>
+            <option value="action">🔥 Action</option>
+            <option value="comedy">😂 Comedy</option>
+            <option value="romantic">❤️ Romantic</option>
+        </select>
+
+        <button onclick="fetchMovie()">🎥 Get Movie</button>
+    </div>
+
+    <div id="result"></div>
+    <img id="poster" />
+
+    <script>
+        async function fetchMovie() {
+            const mode = document.getElementById('mode').value;
+            if (!mode) {
+                alert('Please select a mood');
+                return;
+            }
+
+            try {
+                const response = await fetch('/get-movie', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ mode })
+                });
+
+                const data = await response.json();
+                const result = document.getElementById('result');
+                const poster = document.getElementById('poster');
+
+                if (response.ok) {
+                    result.innerText = `🍿 Suggested Movie: ${data.movie}`;
+                    if (data.poster) {
+                        poster.src = data.poster;
+                        poster.style.display = 'block';
+                    } else {
+                        poster.style.display = 'none';
+                    }
+                } else {
+                    result.innerText = `❌ Error: ${data.error}`;
+                    poster.style.display = 'none';
+                }
+            } catch (error) {
+                document.getElementById('result').innerText = '⚠️ Failed to fetch movie. Try again.';
+                poster.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
